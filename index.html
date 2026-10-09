@@ -51,7 +51,7 @@ section{padding:125px 7vw}.section-head{margin-bottom:58px}.kicker{color:#9b7b43
 footer{background:#07110c;color:#a9aaa2;padding:25px 7vw;display:flex;justify-content:space-between;align-items:center;font-size:10px;letter-spacing:.1em;direction:ltr}.footer-right{display:flex;align-items:center;gap:16px}.snap-link{display:inline-flex;align-items:center;gap:9px;color:#d8c8a6;opacity:.86;transition:.25s;letter-spacing:.08em}.snap-link:hover{color:#f5f0e6;opacity:1;transform:translateY(-1px)}.snap-icon{width:22px;height:22px;display:grid;place-items:center;border:1px solid rgba(199,167,106,.38);border-radius:50%;background:rgba(199,167,106,.06)}.snap-icon svg{width:13px;height:13px;display:block}.footer-divider{width:1px;height:18px;background:rgba(245,240,230,.12)}footer span:last-child{direction:rtl}
 @media(max-width:900px){.nav{display:none}.availability{margin-right:auto}.hero-side{display:none}.contact-wrap{grid-template-columns:1fr;gap:40px}.contact-details{margin-top:0}.contact-signature img{width:230px}.works-grid{grid-template-columns:1fr}.work-card,.work-card:nth-child(3n),.work-card:nth-child(4n){grid-column:auto}.service-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:600px){header{padding:14px 5vw}.brand-mark{width:47px;height:29px}.brand-type{display:none}.availability{font-size:9px;padding:7px 10px}.hero-content{transform:translateY(-3vh)}.eyebrow{font-size:8px;letter-spacing:.24em}.hero-logo{font-size:clamp(82px,24vw,150px)}.brand-caption{font-size:8px;letter-spacing:.27em;gap:9px}.brand-caption i{width:20px}.descriptor{font-size:8px}.arabic-descriptor{font-size:11px}.hero-meta{font-size:8px;bottom:8vh}.hero-meta span:nth-child(2){display:none}section{padding:90px 6vw}.section-head{display:block;margin-bottom:38px}.section-title{font-size:clamp(37px,12vw,60px)}.section-note{margin-top:18px}.about-grid{grid-template-columns:1fr;gap:45px}.about-copy{font-size:25px}.brand-strip{grid-template-columns:auto 1fr;gap:16px}.brand-strip-type{display:none}.brand-strip p{font-size:11px}.service-grid{grid-template-columns:1fr}.service{min-height:200px}.service h3{margin-top:38px}.works{padding-top:95px;padding-bottom:95px}.filters{margin:-10px 0 25px}.works-grid{gap:12px}.work-info{padding:18px}.work-title{font-size:18px}.contact-title{font-size:19vw}.contact-signature .signature-word{font-family:"El Messiri",serif;font-weight:600;font-size:72px;line-height:1;color:#d7bd87;display:block}.contact-details{font-size:10px}footer{display:block;text-align:center;line-height:2.4}.contact{min-height:auto;padding-bottom:100px}}
-.brand-mark{width:auto!important;height:auto!important;min-width:0!important}.hero-logo{width:auto!important;max-width:none!important}.contact-signature .signature-word{font-family:"El Messiri",serif;font-weight:600;font-size:clamp(58px,8vw,92px);line-height:1;color:#d7bd87;display:block}.contact-signature img{display:none!important}
+.brand-mark{width:auto!important;height:auto!important;min-width:0!important}.hero-logo{width:auto!important;max-width:none!important}.contact-signature .signature-word{font-family:"El Messiri",serif;font-weight:600;font-size:clamp(58px,8vw,92px);line-height:1;color:#d7bd87;display:block}
 
 /* V10 — refined hero, mobile navigation and touch interactions */
 header{transition:background .35s ease,transform .35s ease;padding-top:20px;padding-bottom:20px}
@@ -200,6 +200,12 @@ section{padding-block:clamp(90px,10vw,125px)}
 .contact-signature>div{margin-top:0}
 @media(max-width:900px){.contact-signature .contact-mark-only{width:132px}}
 @media(max-width:600px){.contact-signature{gap:12px}.contact-signature .contact-mark-only{width:108px}}
+
+/* V18 — visible compact signature above contact location */
+.contact-signature{display:flex;flex-direction:column;align-items:flex-start;gap:14px}
+.contact-signature .contact-mark-only{display:block!important;width:clamp(90px,9vw,120px)!important;height:auto;object-fit:contain;filter:drop-shadow(0 12px 22px rgba(0,0,0,.22))}
+.contact-signature>div{margin-top:0}
+@media(max-width:600px){.contact-signature{gap:12px}.contact-signature .contact-mark-only{width:100px!important}}
 </style>
 </head>
 <body>

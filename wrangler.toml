@@ -1,0 +1,12 @@
+name = "saleh-design-api"
+main = "saleh-api-worker.js"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "saleh-design"
+database_id = "d20e473b-2579-46d2-92c1-b11a2bf333a4"
+
+[[r2_buckets]]
+binding = "ASSETS"
+bucket_name = "saleh-assets"

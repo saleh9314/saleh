@@ -64,6 +64,25 @@ async function analytics(db) {
   const top = await db.prepare("SELECT pv.project_id,pv.views,p.title,p.category FROM project_views pv LEFT JOIN projects p ON p.id=pv.project_id ORDER BY pv.views DESC,pv.last_viewed_at DESC LIMIT 10").all();
   return { totalVisits: Number(total?.total || 0), todayVisits: Number(today?.visits || 0), daily: (daily.results || []).reverse(), topProjects: top.results || [] };
 }
+async function getContact(db) {
+  const row = await db.prepare("SELECT value,updated_at FROM site_settings WHERE key=?").bind("contact").first();
+  try { return { ...(JSON.parse(row?.value || "{}")), updated_at: row?.updated_at || null }; }
+  catch { return { updated_at: row?.updated_at || null }; }
+}
+function cleanContact(value) {
+  const v = value && typeof value === "object" ? value : {};
+  return { phone:String(v.phone||"").trim().slice(0,80), whatsapp:String(v.whatsapp||"").trim().slice(0,160), location:String(v.location||"").trim().slice(0,120), website:String(v.website||"").trim().slice(0,120), instagram:String(v.instagram||"").trim().slice(0,300), snapchat:String(v.snapchat||"").trim().slice(0,300), email:String(v.email||"").trim().slice(0,160) };
+}
+async function orphanAssets(env) {
+  const refs = new Set();
+  const covers = await env.DB.prepare("SELECT image FROM projects WHERE image IS NOT NULL AND image != ''").all();
+  const gallery = await env.DB.prepare("SELECT image_url FROM project_images WHERE image_url IS NOT NULL AND image_url != ''").all();
+  for (const row of covers.results || []) { const key=assetKey(row.image); if(key) refs.add(key); }
+  for (const row of gallery.results || []) { const key=assetKey(row.image_url); if(key) refs.add(key); }
+  const orphaned=[]; let cursor;
+  do { const page=await env.ASSETS.list({prefix:"projects/",cursor}); for(const object of page.objects||[]) if(!refs.has(object.key)) orphaned.push({key:object.key,size:object.size||0,uploaded:object.uploaded||null}); cursor=page.truncated?page.cursor:undefined; } while(cursor);
+  return {referenced:refs.size,orphaned};
+}
 function extension(contentType) {
   return ({ "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/avif": "avif", "image/gif": "gif" })[contentType] || "bin";
 }
@@ -100,6 +119,9 @@ export default {
       if (u.pathname === "/api/projects" && request.method === "GET") {
         return out({ projects: await projects(env.DB, false) }, 200, { "cache-control": "public, max-age=60, s-maxage=300" });
       }
+      if (u.pathname === "/api/settings" && request.method === "GET") {
+        return out({ contact: await getContact(env.DB) }, 200, { "cache-control": "public, max-age=60, s-maxage=300" });
+      }
       if (u.pathname === "/api/analytics/view" && request.method === "POST") {
         const p = await request.json().catch(() => ({}));
         if (["visit", "project_view"].includes(p.event)) await recordAnalytics(env.DB, p.event, String(p.project_id || ""));
@@ -107,6 +129,20 @@ export default {
       }
       if (u.pathname.startsWith("/api/admin/") && !identity(request)) return out({ error: "Unauthorized" }, 401);
       if (u.pathname === "/api/admin/analytics" && request.method === "GET") return out(await analytics(env.DB));
+      if (u.pathname === "/api/admin/settings/contact" && request.method === "GET") return out({ contact: await getContact(env.DB) });
+      if (u.pathname === "/api/admin/settings/contact" && request.method === "PUT") {
+        const contact=cleanContact(await request.json().catch(()=>({})));
+        await env.DB.prepare("INSERT INTO site_settings (key,value,updated_at) VALUES (?,?,CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=CURRENT_TIMESTAMP").bind("contact",JSON.stringify(contact)).run();
+        return out({ok:true,contact:await getContact(env.DB)});
+      }
+      if (u.pathname === "/api/admin/assets/orphans" && request.method === "GET") {
+        return out({ok:true,dryRun:true,...await orphanAssets(env)});
+      }
+      if (u.pathname === "/api/admin/assets/orphans" && request.method === "DELETE") {
+        const report=await orphanAssets(env),deleted=[];
+        for(const item of report.orphaned){await env.ASSETS.delete(item.key);deleted.push(item);}
+        return out({ok:true,dryRun:false,referenced:report.referenced,deleted,count:deleted.length});
+      }
 
       if (u.pathname === "/api/admin/upload" && request.method === "POST") {
         const form = await request.formData();
